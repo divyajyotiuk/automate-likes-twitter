@@ -37,7 +37,7 @@ module.exports = function AuthStringGenerator(method, param, api){
    ,   oAuthSignature = Base64.stringify(CryptoJS.HmacSHA1(signatureBaseString, signingKey))
    ,   encodedAuthSign = encodeURIComponent(oAuthSignature)
    ;
-
+    console.log(oAuthSignature)
    return `OAuth oauth_consumer_key="${process.env.API_KEY}", ` + 
             `oauth_nonce="${nonce}", ` +
             `oauth_signature="${encodedAuthSign}", ` +
