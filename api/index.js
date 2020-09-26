@@ -54,24 +54,27 @@ async function postLikesOnMentions(params) {
 }
 
 module.exports = async (req, res) => {
-    
-}
-
-
-//Uncomment for running on the terminal $ node index.js
-(async () => {
+    let httpResponse = res;
     try {
         // Make request
         const twitterIds = await getTweetsWithMentions();
         console.log(twitterIds)
-
+        let results = [];
         await twitterIds.reduce(async (promise, id) => {
             await promise; //for the last promise in the chain to resolve
             const params = {
                 "id": id
             } 
             const res = await postLikesOnMentions(params);
-            console.log(res.errors);
+            if(!res){
+                httpResponse.status(500).send(`Some error occurred`)
+            }
+            results.push(res.errors);
+            console.log(res);
+            
+            if(results.length == twitterIds.length){
+                httpResponse.status(200).send(`Hello World!`)
+            }
         }, Promise.resolve());
 
         //very easy using Twit 
@@ -84,7 +87,38 @@ module.exports = async (req, res) => {
 
     } catch(e) {
         console.log('catch block ', e);
-        process.exit(-1);
+        httpResponse.status(500).send(`Some error occurred `+e)
     }
-    process.exit();
-})();
+}
+
+
+//Uncomment for running on the terminal $ node index.js
+// (async () => {
+//     try {
+//         // Make request
+//         const twitterIds = await getTweetsWithMentions();
+//         console.log(twitterIds)
+
+//         await twitterIds.reduce(async (promise, id) => {
+//             await promise; //for the last promise in the chain to resolve
+//             const params = {
+//                 "id": id
+//             } 
+//             const res = await postLikesOnMentions(params);
+//             console.log(res.errors);
+//         }, Promise.resolve());
+
+//         //very easy using Twit 
+//         // const params = {
+//         //     id: '1309222192866041857'
+//         // }   
+//         // await TwitterClient.post('favorites/create', params, function(err, data, response){
+//         //     console.log("data :: ",response);
+//         // })
+
+//     } catch(e) {
+//         console.log('catch block ', e);
+//         process.exit(-1);
+//     }
+//     process.exit();
+// })();
