@@ -15,6 +15,7 @@ function buildParameterString(param){
         key = keys[0];
         value = encodeURIComponent(param[key]);
     }
+    console.log(timestamp);
     return `${key}=${value}` + `&` + `oauth_consumer_key=${process.env.API_KEY}` + `&` +
             `oauth_nonce=${nonce}` + `&` +
             `oauth_signature_method=HMAC-SHA1` + `&` +
