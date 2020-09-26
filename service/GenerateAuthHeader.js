@@ -4,10 +4,8 @@ const CryptoJS = require("crypto-js");
 const Base64 = require('crypto-js/enc-base64');
 
 const signingKey = `${process.env.API_SECRET}&${process.env.ACCESS_TOKEN_SECRET}`;
-const nonce = cryptoRandomString({length: 42, type: 'base64'});
 
-function buildParameterString(param){
-    const timestamp = Math.round(Date.now()/1000);
+function buildParameterString(param, timestamp, nonce){
     let key = null;
     let value = null;
     if(Object.keys(param).length == 1){
@@ -15,7 +13,7 @@ function buildParameterString(param){
         key = keys[0];
         value = encodeURIComponent(param[key]);
     }
-    console.log(timestamp, nonce);
+    console.log('param : ',timestamp, nonce)
     return `${key}=${value}` + `&` + `oauth_consumer_key=${process.env.API_KEY}` + `&` +
             `oauth_nonce=${nonce}` + `&` +
             `oauth_signature_method=HMAC-SHA1` + `&` +
@@ -24,22 +22,26 @@ function buildParameterString(param){
             `oauth_version=1.0`;
 }
 
-function buildSignatureBaseString(method, param, api){
+function buildSignatureBaseString(data){
+    const {method, param, api, timestamp, nonce} = data;
     let methodUppercase = String(method).toUpperCase()
     ,   encodedApi = encodeURIComponent(api)
-    ,   encodedParamString = encodeURIComponent(buildParameterString(param));
+    ,   encodedParamString = encodeURIComponent(buildParameterString(param, timestamp, nonce));
     ;
 
     return `${methodUppercase}` + `&` + `${encodedApi}` + `&` + `${encodedParamString}`;
 }
 
-module.exports = function AuthStringGenerator(method, param, api){
+module.exports = function AuthStringGenerator(data){
     const timestamp = Math.round(Date.now()/1000);
-    let signatureBaseString = buildSignatureBaseString(method, param, api)
+    const nonce = cryptoRandomString({length: 42, type: 'alphanumeric'});
+    data['timestamp'] = timestamp;
+    data['nonce'] = nonce;
+    let signatureBaseString = buildSignatureBaseString(data)
     ,   oAuthSignature = Base64.stringify(CryptoJS.HmacSHA1(signatureBaseString, signingKey))
     ,   encodedAuthSign = encodeURIComponent(oAuthSignature)
     ;
-    console.log(timestamp, nonce)
+    console.log('main : ',timestamp, nonce)
    return `OAuth oauth_consumer_key="${process.env.API_KEY}", ` + 
             `oauth_nonce="${nonce}", ` +
             `oauth_signature="${encodedAuthSign}", ` +

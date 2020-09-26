@@ -40,7 +40,12 @@ async function getTweetsWithMentions() {
 
 async function postLikesOnMentions(params) {
     
-    const oAuthHeader = AuthStringGenerator('post', params, postLikesApi);
+    const oAuthParams = {
+        method: 'post',
+        param: params,
+        api: postLikesApi
+    }
+    const oAuthHeader = AuthStringGenerator(oAuthParams);
 
     const res = await needle('post', postLikesApi, params, { headers: {
         "authorization": oAuthHeader
