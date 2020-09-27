@@ -74,11 +74,15 @@ module.exports = async (req, res) => {
             if(!res){
                 httpResponse.status(500).send(`Some error occurred`)
             }
-            results.push(res.errors);
+            if(res.errors){
+                results.push(res.errors);
+            }else{
+                results.push(res.favorited);
+            }
             console.log(res);
             
             if(results.length == twitterIds.length){
-                httpResponse.status(200).send(`Hello World!`)
+                httpResponse.status(200).send(results)
             }
         }, Promise.resolve());
 
